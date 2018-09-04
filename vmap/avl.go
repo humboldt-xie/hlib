@@ -60,7 +60,7 @@ func (self *AvlTree) Put(key types.Hashable, value interface{}) (err error) {
 func (self *AvlTree) Get(key types.Hashable) (value interface{}, err error) {
 	return self.root.Get(key)
 }
-func (self *AvlTree) Range(from types.Hashable, to types.Hashable, call func(value interface{})) int {
+func (self *AvlTree) Range(from types.Hashable, to types.Hashable, call func(from types.Hashable, value interface{})) int {
 	return self.root.Range(from, to, call)
 }
 
@@ -122,17 +122,16 @@ func (self *AvlNode) Get(key types.Hashable) (value interface{}, err error) {
 		return self.right.Get(key)
 	}
 }
-func (self *AvlNode) Range(from types.Hashable, to types.Hashable, call func(value interface{})) int {
+func (self *AvlNode) Range(from types.Hashable, to types.Hashable, call func(key types.Hashable, value interface{})) int {
 	if self == nil || to.Less(from) {
 		return 1
 	}
 	c := 1
 	c += self.left.Range(from, hmin(self.key, to), call)
-	// key>=from && key<=to
 	geFrom := !self.key.Less(from)
 	leTo := !to.Less(self.key)
 	if geFrom && leTo {
-		call(self.value)
+		call(self.key, self.value)
 	}
 	c += self.right.Range(hmax(self.key, from), to, call)
 	return c
